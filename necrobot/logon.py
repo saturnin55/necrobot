@@ -67,7 +67,7 @@ def set_up_logger():
     file_formatter = logging.Formatter('[%(asctime)s] %(levelname)s:%(name)s: %(message)s')
 
     stdout_handler = logging.StreamHandler(stream=sys.stdout)
-    stderr_handler = logging.StreamHandler()
+    stderr_handler = logging.StreamHandler(stream=sys.stderr)
     file_handler = logging.FileHandler(filename=log_output_filename, encoding='utf-8', mode='w')
 
     # stdout_handler.setLevel(logging.INFO)
