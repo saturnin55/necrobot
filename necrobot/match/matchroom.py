@@ -14,6 +14,7 @@ from necrobot.util import timestr
 from necrobot.race import cmd_race
 from necrobot.match import cmd_match
 from necrobot.test import cmd_test
+from necrobot.user import cmd_user
 
 from necrobot.database import ratingsdb, matchdb, racedb
 from necrobot.ladder import ratingutil
@@ -68,6 +69,8 @@ class MatchRoom(BotChannel):
             cmd_match.SetMatchType(self),
             cmd_match.Update(self),
 
+            cmd_user.UserInfo(self),
+
             cmd_test.TestMatch(self),
         ]
 
@@ -94,6 +97,8 @@ class MatchRoom(BotChannel):
             cmd_race.Reseed(self),
             cmd_race.ChangeRules(self),
 
+            cmd_user.UserInfo(self),
+
             cmd_test.TestMatch(self),
         ]
 
@@ -110,6 +115,8 @@ class MatchRoom(BotChannel):
             cmd_match.Update(self),
 
             cmd_race.ChangeRules(self),
+
+            cmd_user.UserInfo(self),
 
             cmd_test.TestMatch(self),
         ]
@@ -185,7 +192,8 @@ class MatchRoom(BotChannel):
               '\N{BULLET} Confirm a suggested time with `.confirm`. You may remove a confirmation with ' \
               '`.unconfirm`.\n' \
               '\N{BULLET} To reschedule a time both racers have confirmed, both racers must call `.unconfirm`.\n' \
-              '\N{BULLET} You may alert CoNDOR staff at any time by calling `.staff`.\n'
+              '\N{BULLET} You may alert CoNDOR staff at any time by calling `.staff`.\n' \
+              '\N{BULLET} This match is {matchformat}.\n '.format(matchformat=self.match.match_info.format_str)
 
         if self.match.racer_1.timezone is not None and self.match.racer_2.timezone is not None:
             utcnow = pytz.utc.localize(datetime.datetime.utcnow())
