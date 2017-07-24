@@ -29,6 +29,8 @@ async def send_match_tweet(match: Match):
 
     curl = pycurl.Curl()
     try:
+        curl.setopt(pycurl.CONNECTTIMEOUT, 10)
+        curl.setopt(pycurl.TIMEOUT, 10)
         curl.setopt(pycurl.CAINFO, certifi.where())
         curl.setopt(pycurl.URL, curl_url)
         curl.perform()
