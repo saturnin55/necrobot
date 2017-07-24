@@ -7,7 +7,7 @@ from necrobot.gsheet import cmd_sheet
 from necrobot.match import matchutil
 from necrobot.gsheet import sheetlib
 from necrobot.stats import statfn
-from necrobot.user import userlib
+from necrobot.util import tweeter
 
 from necrobot.botbase.manager import Manager
 from necrobot.gsheet.matchupsheet import MatchupSheet
@@ -84,6 +84,7 @@ class CondorMgr(Manager, metaclass=Singleton):
         elif ev.event_type == 'match_alert':
             if ev.final:
                 await self.match_alert(ev.match)
+                await tweeter.send_match_tweet(ev.match)
             else:
                 await self.cawmentator_alert(ev.match)
         elif ev.event_type == 'notify':

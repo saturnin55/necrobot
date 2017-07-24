@@ -2,7 +2,7 @@
 
 Current version: 0.10
 
-- Match type isn't being set from sheet correctly?nt
+- Match type isn't being set from sheet correctly?
 - Race rooms maybe should use RTMP names only
 - Output text in channel on command throwing error if possible
 - Add timeout to VodRecorder calls
