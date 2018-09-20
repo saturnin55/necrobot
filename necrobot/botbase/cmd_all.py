@@ -65,10 +65,6 @@ class Help(CommandType):
                 )
                 return
 
-            cmds_to_show = sorted(
-                cmds_to_show,
-                key=lambda c: ('_' if not c.admin_only else '') + c.command_name
-            )
             cutoff = 1900 // len(cmds_to_show)
             for cmd_type in cmds_to_show:
                 this_cmd_text = '\n`{2}{0}` -- {1}'.format(
