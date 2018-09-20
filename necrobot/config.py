@@ -73,7 +73,7 @@ SERVER_ID: str
 Matches
 -------
 MATCH_AUTOCONTEST_IF_WITHIN_HUNDREDTHS: int
-    If the two racer's times are within this many hundredths of a second, the match is 
+    If the two racer's times are within this many hundredths of a second, the match is
     automatically contested.
 MATCH_FIRST_WARNING: datetime.timedelta
     The time before match start at which to first ping the racers.
@@ -96,7 +96,7 @@ FINALIZE_TIME_SEC: int
 RaceRooms
 ---------
 CLEANUP_TIME: datetime.timedelta
-    The amount of time of no chatting in a room with no ongoing race before it is 
+    The amount of time of no chatting in a room with no ongoing race before it is
     automatically deleted.
 NO_ENTRANTS_CLEANUP: datetime.timedelta
     The amount of time a raceroom can have zero entrants before it is automatically
@@ -142,15 +142,8 @@ class Config(object):
     DEBUG_LEVEL = DebugLevel.TEST
 
     # Admin -----------------------------------------------------------------------------------
-    ADMIN_ROLE_NAMES = ['Admin', 'CoNDOR Staff', 'Necrobot']  # list of names of roles to give admin access
-    STAFF_ROLE = 'CoNDOR Staff Fake'
-
-    # Channels --------------------------------------------------------------------------------
-    MAIN_CHANNEL_NAME = 'necrobot_main'
-    DAILY_LEADERBOARDS_CHANNEL_NAME = 'daily_leaderboards'
-    LADDER_ADMIN_CHANNEL_NAME = 'ladder_admin'
-    RACE_RESULTS_CHANNEL_NAME = 'race_results'
-    NOTIFICATIONS_CHANNEL_NAME = 'bot_notifications'
+    ADMIN_ROLE_NAMES = ['Admin']  # list of names of roles to give admin access
+    STAFF_ROLE = 'Staff'
 
     # Database --------------------------------------------------------------------------------
     MYSQL_DB_HOST = 'localhost'

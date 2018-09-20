@@ -157,7 +157,7 @@ class Necrobot(object, metaclass=Singleton):
     async def force_command(self, channel: discord.Channel, author: discord.Member, message_str: str) -> None:
         """Causes the bot to act as if the given author had posted the given message in the given channel, and
         reacts to it as if it were a command.
-        
+
         Warning: This won't work on commands that depend specifically on the discord.Message object, since
         TestCommand cannot fake such an object.
         """

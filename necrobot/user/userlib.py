@@ -43,7 +43,7 @@ async def get_user(
     user_id: int
         The user's database ID.
     any_name: str
-        Will search for a user, if possible, whose rtmp_name, discord_name, or twitch_name is equal to that name, 
+        Will search for a user, if possible, whose rtmp_name, discord_name, or twitch_name is equal to that name,
         case-insensitive. If multiple users, prioritize by name type (1=rtmp, 2=discord, 3=twitch), then randomly.
         Providing this field means that the above fields will be ignored.
     register: bool

@@ -1,12 +1,4 @@
-data/*
-ignore/
-tmp/
-*.db
-*.pyc
-*.log
-*.xml
-*.sql
-.idea/necrobot.iml
-ratelimittest.py
-ilp_test.txt
-*.mps
+__pycache__
+venv
+data
+logging
