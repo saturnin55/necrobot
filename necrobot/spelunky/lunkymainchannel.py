@@ -1,6 +1,5 @@
 from necrobot.botbase import cmd_admin
 from necrobot.spelunky import cmd_role
-from necrobot.stdconfig import cmd_color
 from necrobot.race import cmd_racemake
 from necrobot.stats import cmd_stats
 from necrobot.user import cmd_user
@@ -15,10 +14,7 @@ class MainBotChannel(BotChannel):
             cmd_admin.Die(self),
             cmd_admin.Reboot(self),
 
-            cmd_color.ColorMe(self),
-
             cmd_racemake.Make(self),
-            cmd_racemake.MakeCondor(self),
             cmd_racemake.MakePrivate(self),
 
             cmd_role.AddRacerRole(self),
@@ -28,9 +24,7 @@ class MainBotChannel(BotChannel):
             cmd_stats.MostRaces(self),
             cmd_stats.Stats(self),
 
-            cmd_user.DailyAlert(self),
             cmd_user.RaceAlert(self),
-            cmd_user.RTMP(self),
             cmd_user.SetInfo(self),
             cmd_user.Timezone(self),
             cmd_user.Twitch(self),
