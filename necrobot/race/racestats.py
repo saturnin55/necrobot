@@ -2,13 +2,14 @@ import math
 
 from necrobot.race import racedb
 from necrobot.util import console, racetime
-from necrobot.util.necrodancer.character import NDChar
+from necrobot.stats.leaguestats import LeagueStats
+from necrobot.util.category import Category
 from necrobot.util.singleton import Singleton
 
 
-class CharacterStats(object):
-    def __init__(self, ndchar):
-        self._ndchar = ndchar
+class CategoryStats(object):
+    def __init__(self, category):
+        self.category = category
         self.number_of_races = 0
         self.mean = 0
         self.var = 0
@@ -16,12 +17,8 @@ class CharacterStats(object):
         self.has_wins = False
 
     @property
-    def ndchar(self) -> NDChar:
-        return self._ndchar
-
-    @property
-    def charname(self) -> str:
-        return self.ndchar.name
+    def catname(self) -> str:
+        return str(self.category)
 
     @property
     def stdev(self) -> float:
@@ -42,8 +39,8 @@ class CharacterStats(object):
             return '--'
 
     def barf(self) -> None:
-        console.info('{0:>10}   {1:>5}   {2:>9}  {3:>9}  {4:>6}\n'.format(
-            self.charname,
+        console.info('{0:>25}   {1:>5}   {2:>9}  {3:>9}  {4:>6}\n'.format(
+            self.catname,
             self.number_of_races,
             self.mean_str,
             self.stdev_str,
@@ -52,66 +49,60 @@ class CharacterStats(object):
 
 class GeneralStats(object):
     def __init__(self):
-        self._charstats = []
+        self._catstats = []
 
     @property
     def infotext(self) -> str:
-        info_text = '{0:>10}   {1:<5}   {2:<9}  {3:<9}  {4}\n'.format('', 'Races', 'Avg', 'Stdev', 'Clear%')
-        for char in sorted(self._charstats, key=lambda c: c.number_of_races, reverse=True):
-            info_text += '{0:>10}   {1:>5}   {2:>9}  {3:>9}  {4:>6}\n'.format(
-                char.charname,
-                char.number_of_races,
-                char.mean_str,
-                char.stdev_str,
-                int(char.winrate*100))
+        info_text = '{0:>25}   {1:<5}   {2:<9}  {3:<9}  {4}\n'.format('', 'Races', 'Avg', 'Stdev', 'Clear%')
+        for cat in sorted(self._catstats, key=lambda c: c.number_of_races, reverse=True):
+            info_text += '{0:>25}   {1:>5}   {2:>9}  {3:>9}  {4:>6}\n'.format(
+                cat.catname,
+                cat.number_of_races,
+                cat.mean_str,
+                cat.stdev_str,
+                int(cat.winrate*100))
         return info_text[:-1]
 
-    def insert_charstats(self, char: CharacterStats) -> None:
-        self._charstats.append(char)
+    def insert_catstats(self, cat: CategoryStats) -> None:
+        self._catstats.append(cat)
 
-    def get_charstats(self, char: NDChar) -> CharacterStats:
-        for c in self._charstats:
-            if c.ndchar == char:
+    def get_catstats(self, cat: Category) -> CategoryStats:
+        for c in self._catstats:
+            if c.category == cat:
                 return c
-        return CharacterStats(char)
+        return CategoryStats(cat)
 
 
 class StatCache(object, metaclass=Singleton):
     class CachedStats(object):
         def __init__(self):
-            self.last_race_number_amplified = 0      # The number of the last race when amplified was cached
-            self.last_race_number_base = 0           # The number of the last race when base was cached
-            self.amplified_stats = GeneralStats()
-            self.base_stats = GeneralStats()
+            self.last_race_number = 0      # The number of the last race cached
+            self.stats = GeneralStats()
 
     def __init__(self):
         self._cache = {}  # Map from discord ID's to UserStats
 
-    async def get_general_stats(self, user_id, amplified) -> GeneralStats:
+    async def get_general_stats(self, user_id) -> GeneralStats:
         last_race_number = await racedb.get_largest_race_number(user_id=user_id)
 
         # Check whether we have an up-to-date cached version, and if so, return it
         cached_data = self.CachedStats()
         if user_id in self._cache:
             cached_data = self._cache[user_id]
-            if amplified:
-                if cached_data.last_race_number_amplified == last_race_number:
-                    return cached_data.amplified_stats
-            else:
-                if cached_data.last_race_number_base == last_race_number:
-                    return cached_data.base_stats
+            if cached_data.last_race_number == last_race_number:
+                return cached_data.stats
 
         # If here, the cache is out-of-date
         general_stats = GeneralStats()
-        for row in await racedb.get_allzones_race_numbers(user_id=user_id, amplified=amplified):
-            char = NDChar.fromstr(row[0])
-            charstats = CharacterStats(char)
-            charstats.number_of_races = int(row[1])
+        for row in await racedb.get_public_race_numbers(user_id=user_id):
+            cat = Category.fromstr(row[0])
+            catstats = CategoryStats(cat)
+            catstats.number_of_races = int(row[1])
             total_time = 0
             total_squared_time = 0
             number_of_wins = 0
             number_of_forfeits = 0
-            for stat_row in await racedb.get_all_racedata(user_id=user_id, char_name=char.name, amplified=amplified):
+            for stat_row in await racedb.get_all_racedata(user_id=user_id, cat_name=cat.name.lower()):
                 if int(stat_row[1]) == -2:  # finish
                     time = int(stat_row[0])
                     total_time += time
@@ -121,43 +112,39 @@ class StatCache(object, metaclass=Singleton):
                     number_of_forfeits += 1
 
             if number_of_wins > 0:
-                charstats.mean = total_time / number_of_wins
+                catstats.mean = total_time / number_of_wins
 
             if number_of_wins > 1:
-                charstats.has_wins = True
-                charstats.var = \
-                    (total_squared_time / (number_of_wins-1)) - charstats.mean * total_time/(number_of_wins-1)
+                catstats.has_wins = True
+                catstats.var = \
+                    (total_squared_time / (number_of_wins-1)) - catstats.mean * total_time/(number_of_wins-1)
 
             if number_of_wins + number_of_forfeits > 0:
-                charstats.winrate = number_of_wins / (number_of_wins + number_of_forfeits)
+                catstats.winrate = number_of_wins / (number_of_wins + number_of_forfeits)
 
-            general_stats.insert_charstats(charstats)
+            general_stats.insert_catstats(catstats)
 
         # Update the cache
-        if amplified:
-            cached_data.last_race_number_amplified = last_race_number
-            cached_data.amplified_stats = general_stats
-        else:
-            cached_data.last_race_number_base = last_race_number
-            cached_data.base_stats = general_stats
+        cached_data.last_race_number = last_race_number
+        cached_data.stats = general_stats
         self._cache[user_id] = cached_data
 
         # Return
         return general_stats
 
 
-async def get_general_stats(user_id: int, amplified: bool) -> GeneralStats:
-    return await StatCache().get_general_stats(user_id, amplified)
+async def get_general_stats(user_id: int) -> GeneralStats:
+    return await StatCache().get_general_stats(user_id)
 
 
-async def get_character_stats(user_id: int, ndchar: NDChar, amplified: bool) -> CharacterStats:
-    general_stats = await StatCache().get_general_stats(user_id, amplified)
-    return general_stats.get_charstats(ndchar)
+async def get_category_stats(user_id: int, category: Category) -> CategoryStats:
+    general_stats = await StatCache().get_general_stats(user_id)
+    return general_stats.get_catstats(category)
 
 
-async def get_winrates(user_id_1: int, user_id_2: int, ndchar: NDChar, amplified: bool) -> tuple or None:
-    stats_1 = await get_character_stats(user_id_1, ndchar, amplified)
-    stats_2 = await get_character_stats(user_id_2, ndchar, amplified)
+async def get_winrates(user_id_1: int, user_id_2: int, category: Category) -> tuple or None:
+    stats_1 = await get_category_stats(user_id_1, category)
+    stats_2 = await get_category_stats(user_id_2, category)
     if not stats_1.has_wins or not stats_2.has_wins:
         return None
 
@@ -176,17 +163,17 @@ async def get_winrates(user_id_1: int, user_id_2: int, ndchar: NDChar, amplified
     return winrate_of_1, winrate_of_2, neither_finish_prob
 
 
-async def get_most_races_infotext(ndchar: NDChar, limit: int) -> str:
-    most_races = await racedb.get_most_races_leaderboard(str(ndchar), limit)
-    infotext = '{0:>20} {1:>6} {2:>6}\n'.format('', 'Base', 'Amp')
+async def get_most_races_infotext(category: Category, limit: int) -> str:
+    most_races = await racedb.get_most_races_leaderboard(str(category), limit)
+    infotext = '{0:>16} {1:>6} {2:>6}\n'.format('', 'Base', 'Amp')
     for row in most_races:
         infotext += '{0:>20.20} {1:>6} {2:>6}\n'.format(row[0], row[2], row[3])
     return infotext
 
 
-async def get_fastest_times_infotext(ndchar: NDChar, amplified: bool, limit: int) -> str:
-    fastest_times = await racedb.get_fastest_times_leaderboard(str(ndchar), amplified, limit)
-    infotext = '{0:>20} {1:<9} {2:<9} {3:<13}\n'.format('', 'Time (rta)', 'Seed', 'Date')
+async def get_fastest_times_infotext(category: Category, limit: int) -> str:
+    fastest_times = await racedb.get_fastest_times_leaderboard(str(category), limit)
+    infotext = '{0:>16} {1:<9} {2:<9} {3:<13}\n'.format('', 'Time (rta)', 'Seed', 'Date')
     for row in fastest_times:
         infotext += '{0:>20.20} {1:>9} {2:>9} {3:>13}\n'.format(
             row[0],

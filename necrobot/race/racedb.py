@@ -114,29 +114,27 @@ async def get_race_info_from_type_id(race_type: int) -> RaceInfo or None:
 
 
 # Stat functions-------------------------------------------------------------------
-async def get_allzones_race_numbers(user_id: int, amplified: bool) -> list:
+async def get_public_race_numbers(user_id: int) -> list:
     async with DBConnect(commit=False) as cursor:
         params = (user_id,)
         cursor.execute(
             """
-            SELECT `race_types`.`character`, COUNT(*) as num
+            SELECT `race_types`.`category`, COUNT(*) as num
             FROM {1}
                 INNER JOIN {0} ON {0}.`race_id` = {1}.`race_id`
                 INNER JOIN race_types ON {0}.`type_id` = `race_types`.`type_id`
             WHERE {1}.`user_id` = %s
-                AND `race_types`.`descriptor` = 'All-zones'
-                AND {2}`race_types`.`amplified`
-                AND `race_types`.`seeded` AND NOT {0}.`private`
-            GROUP BY `race_types`.`character`
+                AND NOT {0}.`private`
+            GROUP BY `race_types`.`category`
             ORDER BY num DESC
-            """.format(tn('races'), tn('race_runs'), 'NOT ' if not amplified else ''),
+            """.format(tn('races'), tn('race_runs')),
             params)
         return cursor.fetchall()
 
 
-async def get_all_racedata(user_id: int, char_name: str, amplified: bool) -> list:
+async def get_all_racedata(user_id: int, cat_name: str) -> list:
     async with DBConnect(commit=False) as cursor:
-        params = (user_id, char_name)
+        params = (user_id, cat_name)
         cursor.execute(
             """
             SELECT {1}.`time`, {1}.`level`
@@ -144,11 +142,9 @@ async def get_all_racedata(user_id: int, char_name: str, amplified: bool) -> lis
                 INNER JOIN {0} ON {0}.`race_id` = {1}.`race_id`
                 INNER JOIN `race_types` ON {0}.`type_id` = `race_types`.`type_id`
             WHERE {1}.`user_id` = %s
-                AND `race_types`.`character` = %s
-                AND `race_types`.`descriptor` = 'All-zones'
-                AND {2}`race_types`.`amplified`
-                AND race_types.seeded AND NOT {0}.`private`
-            """.format(tn('races'), tn('race_runs'), 'NOT ' if not amplified else ''),
+                AND `race_types`.`category` = %s
+            AND NOT {0}.`private`
+            """.format(tn('races'), tn('race_runs')),
             params
         )
         return cursor.fetchall()

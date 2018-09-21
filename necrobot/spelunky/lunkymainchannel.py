@@ -1,7 +1,6 @@
 from necrobot.botbase import cmd_admin
 from necrobot.spelunky import cmd_role
-from necrobot.race import cmd_racemake
-from necrobot.stats import cmd_stats
+from necrobot.race import cmd_racemake, cmd_racestats
 from necrobot.user import cmd_user
 
 from necrobot.botbase.botchannel import BotChannel
@@ -20,9 +19,9 @@ class MainBotChannel(BotChannel):
             cmd_role.AddRacerRole(self),
             cmd_role.RemoveRacerRole(self),
 
-            cmd_stats.Fastest(self),
-            cmd_stats.MostRaces(self),
-            cmd_stats.Stats(self),
+            cmd_racestats.Fastest(self),
+            cmd_racestats.MostRaces(self),
+            cmd_racestats.Stats(self),
 
             cmd_user.RaceAlert(self),
             cmd_user.SetInfo(self),
