@@ -51,11 +51,9 @@ class RaceRoom(BotChannel):
             cmd_race.Pause(self),
             cmd_race.Unpause(self),
             cmd_race.Reseed(self),
-            cmd_race.ChangeRules(self),
 
             cmd_publicrace.Rematch(self),
             cmd_publicrace.Kick(self),
-            # cmd_publicrace.DelayRecord(self),
             cmd_publicrace.Notify(self),
             cmd_publicrace.Unnotify(self),
             cmd_publicrace.Missing(self),
@@ -122,7 +120,7 @@ class RaceRoom(BotChannel):
         if seed_str:
             seed_str = '\n' + seed_str
 
-        return race.race_info.format_str + room_rider + seed_str + '\n'
+        return race.race_info.cat_str + room_rider + seed_str + '\n'
 
 # Methods -------------------------------------------------------------
     # Notifies the given user on a rematch
@@ -195,16 +193,6 @@ class RaceRoom(BotChannel):
             await self.write('Races in this necrobot will have their results posted to the results necrobot.')
         else:
             await self.write('Races in this necrobot will not have their results posted to the results necrobot.')
-
-    # Change the RaceInfo for this room
-    async def change_race_info(self, command_args: list):
-        new_race_info = raceinfo.parse_args_modify(command_args, raceinfo.RaceInfo.copy(self._race_info))
-        if new_race_info:
-            self._race_info = new_race_info
-            if self.current_race.before_race:
-                self.current_race.race_info = raceinfo.RaceInfo.copy(self._race_info)
-            await self.write('Changed rules for the next race.')
-            await self.update()
 
     # Close the channel.
     async def close(self):

@@ -145,11 +145,19 @@ class Config(object):
     ADMIN_ROLE_NAMES = ['Admin']  # list of names of roles to give admin access
     STAFF_ROLE = 'Staff'
 
+    # Channels --------------------------------------------------------------------------------
+    MAIN_CHANNEL_NAME = 'necrobot_main'
+    DAILY_LEADERBOARDS_CHANNEL_NAME = 'daily_leaderboards'
+    LADDER_ADMIN_CHANNEL_NAME = 'ladder_admin'
+    RACE_RESULTS_CHANNEL_NAME = 'race_results'
+    NOTIFICATIONS_CHANNEL_NAME = 'bot_notifications'
+
     # Database --------------------------------------------------------------------------------
     MYSQL_DB_HOST = 'localhost'
     MYSQL_DB_USER = 'root'
     MYSQL_DB_PASSWD = ''
     MYSQL_DB_NAME = 'necrobot'
+    MYSQL_DB_PORT = '3306'
 
     # Daily -----------------------------------------------------------------------------------
     DAILY_GRACE_PERIOD = datetime.timedelta(minutes=60)
@@ -178,11 +186,11 @@ class Config(object):
     COUNTDOWN_LENGTH = int(10)
     UNPAUSE_COUNTDOWN_LENGTH = int(3)
     INCREMENTAL_COUNTDOWN_START = int(5)
-    FINALIZE_TIME_SEC = int(30)
+    FINALIZE_TIME_SEC = int(60)
     RACE_CHANNEL_CATEGORY_NAME = "Race rooms"
 
     # RaceRooms -------------------------------------------------------------------------------
-    CLEANUP_TIME = datetime.timedelta(minutes=3)
+    CLEANUP_TIME = datetime.timedelta(minutes=2)
     NO_ENTRANTS_CLEANUP = datetime.timedelta(minutes=2)
     NO_ENTRANTS_CLEANUP_WARNING = datetime.timedelta(minutes=1, seconds=30)
     RACE_POKE_DELAY = int(10)
@@ -204,6 +212,7 @@ class Config(object):
             ['mysql_db_user', Config.MYSQL_DB_USER],
             ['mysql_db_passwd', Config.MYSQL_DB_PASSWD],
             ['mysql_db_name', Config.MYSQL_DB_NAME],
+            ['mysql_db_port', Config.MYSQL_DB_PORT],
 
             ['vodrecord_username', Config.VODRECORD_USERNAME],
             ['vodrecord_passwd', Config.VODRECORD_PASSWD],
@@ -237,6 +246,7 @@ def init(config_filename):
         'mysql_db_user': 'root',
         'mysql_db_passwd': '',
         'mysql_db_name': 'necrobot',
+        'mysql_db_port': '3306',
         'vodrecord_username': '',
         'vodrecord_passwd': '',
         'activate_vodrecord': 'false',
@@ -262,6 +272,7 @@ def init(config_filename):
     Config.MYSQL_DB_USER = defaults['mysql_db_user']
     Config.MYSQL_DB_PASSWD = defaults['mysql_db_passwd']
     Config.MYSQL_DB_NAME = defaults['mysql_db_name']
+    Config.MYSQL_DB_PORT = defaults['mysql_db_port']
 
     Config.VODRECORD_USERNAME = defaults['vodrecord_username']
     Config.VODRECORD_PASSWD = defaults['vodrecord_passwd']

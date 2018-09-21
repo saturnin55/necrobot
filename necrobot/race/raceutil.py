@@ -36,7 +36,7 @@ async def make_room(race_info):
     alert_pref = UserPrefs(daily_alert=None, race_alert=True)
 
     alert_string = 'A new race has been started:\nFormat: {1}\nChannel: {0}'.format(
-        race_channel.mention, race_info.format_str)
+        race_channel.mention, race_info.cat_str)
     for member_id in await userdb.get_all_discord_ids_matching_prefs(alert_pref):
         member = server.find_member(discord_id=member_id)
         if member is not None:
@@ -50,7 +50,7 @@ async def make_room(race_info):
 
 # Return a new (unique) race room name from the race info
 def get_raceroom_name(race_info):
-    name_prefix = race_info.raceroom_name
+    name_prefix = race_info.category.name.lower()
     cut_length = len(name_prefix) + 1
     largest_postfix = 0
     for channel in server.server.channels:

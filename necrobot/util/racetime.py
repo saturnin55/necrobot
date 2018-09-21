@@ -1,54 +1,32 @@
-"""
-Given a time string, returns the time in total hundredths of a second, or -1 on failure.
-Allowable string formats:
- [m]m:ss.hh
- [m]m:ss:hh
- [m]m:ss
-"""
+import re
 
 
 def from_str(time_str):
-    args = time_str.split(':')
-    if len(args) == 1:                                  # look for [m]m.ss.hh format
-        args = time_str.split('.')
-        if len(args) == 3 and len(args[1]) == 2 and len(args[2]) == 2:
-            try:
-                t_min = int(args[0])
-                t_sec = int(args[1])
-                t_hun = int(args[2])
-                return 6000*t_min + 100*t_sec + t_hun
-            except ValueError:
-                return -1
-    elif len(args) == 2:
-        args_2 = args[1].split('.')
-        if len(args_2) == 1 and len(args_2[0]) == 2:    # [m]m:ss format
-            try:
-                t_min = int(args[0])
-                t_sec = int(args_2[0])
-                return 6000*t_min + 100*t_sec
-            except ValueError:
-                return -1
-        elif len(args_2) == 2 and len(args_2[0]) == 2 and len(args_2[1]) == 2:
-            try:
-                t_min = int(args[0])
-                t_sec = int(args_2[0])
-                t_hun = int(args_2[1])
-                return 6000*t_min + 100*t_sec + t_hun
-            except ValueError:
-                return -1
-    elif len(args) == 3 and len(args[1]) == 2 and len(args[2]) == 2:
-        try:
-            t_min = int(args[0])
-            t_sec = int(args[1])
-            t_hun = int(args[2])
-            return 6000*t_min + 100*t_sec + t_hun
-        except ValueError:
-            return -1
-    return -1
+    """Given a time string, returns the time in total milliseconds, or -1 on failure."""
+    args = re.findall(r'\d+', time_str)
+    if not args or len(args) > 4:
+        return -1
+    elif len(args) == 4:
+        args[1] += args[0] * 60
+        args = args[1:]
+
+    result = int(args[0]) * 60000
+
+    try:
+        result += int(args[1]) * 1000
+    except IndexError:
+        pass
+
+    try:
+        result += int(args[2])
+    except IndexError:
+        pass
+
+    return result
 
 
-def to_str(time_hund):          # time_hund in total hundredths of second; returns a string in the form [m]:ss.hh
-    minutes = int(int(time_hund) // int(6000))
-    seconds = int(int(time_hund) // int(100) - int(60)*minutes)
-    hundredths = int(int(time_hund) - 100*seconds - 6000*minutes)
-    return str(minutes) + ':' + str(seconds).zfill(2) + '.' + str(hundredths).zfill(2)
+def to_str(time_ms):  # time in milliseconds; returns a string in the form [m]:ss.ttt
+    minutes = int(int(time_ms) // int(60000))
+    seconds = int(int(time_ms) // int(1000) - int(60)*minutes)
+    ms = int(int(time_ms) - 1000*seconds - 60000*minutes)
+    return str(minutes) + ':' + str(seconds).zfill(2) + '.' + str(ms).zfill(3)

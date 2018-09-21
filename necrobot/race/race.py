@@ -61,17 +61,17 @@ class RaceEvent(object):
 # RaceStatus enum ---------------------------------------------------------
 class RaceStatus(IntEnum):
     """An Enum describing the current "phase" of the race.
-    
+
     Values
     ------
-        uninitialized  
+        uninitialized
             initialize() should be called on this object (not called in __init__ because coroutine).
-        entry_open      
+        entry_open
             The race is open to new entrants.
         counting_down
             The bot is counting down to race start.
             If people .unready during this time, race reverts to the entry_open state.
-        racing 
+        racing
             The race has begun, and at least one player is still racing.
         race_completed
             All players have either finished or forfeited.
@@ -80,7 +80,7 @@ class RaceStatus(IntEnum):
             All players have finished or forfeited, and the race results are marked as final and can be
             recorded. No further changes possible.
         canceled
-            The race has been canceled. No further changes possible.    
+            The race has been canceled. No further changes possible.
     """
 
     uninitialized = 0
@@ -139,9 +139,9 @@ class Race(object):
     @property
     def current_time(self) -> int or None:
         if self._status == RaceStatus.paused:
-            return int(100 * (self._last_pause_time - self._adj_start_time))
+            return int(1000 * (self._last_pause_time - self._adj_start_time))
         elif self._status == RaceStatus.racing or self._status == RaceStatus.completed:
-            return int(100 * (time.monotonic() - self._adj_start_time))
+            return int(1000 * (time.monotonic() - self._adj_start_time))
         else:
             return None
 
@@ -576,13 +576,6 @@ class Race(object):
     async def reseed(self, mute=False):
         if not self.race_info.seeded:
             await self._write(mute=mute, text='This is not a seeded race. Use `.changerules` to change this.')
-
-        elif self.race_info.seed_fixed:
-            await self._write(
-                mute=mute,
-                text='The seed for this race was fixed by its rules. Use `.changerules` to change this.')
-            return
-
         else:
             self.race_info.seed = seedgen.get_new_seed()
             await self._write(mute=mute, text='Changed seed to {0}.'.format(self.race_info.seed))
@@ -618,10 +611,10 @@ class Race(object):
                 console.warning("{} isn't ready while calling race._begin_race -- unexpected error.".format(
                     racer.name))
 
+        await self._write(mute=mute, text='GO!')
         self._status = RaceStatus.racing
         self._adj_start_time = time.monotonic()
         self._start_datetime = datetime.datetime.utcnow()
-        await self._write(mute=mute, text='GO!')
         await self._process(RaceEvent.EventType.RACE_BEGIN)
 
     # Checks to see if all racers have either finished or forfeited. If so, ends the race.

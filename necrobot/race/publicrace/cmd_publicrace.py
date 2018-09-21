@@ -4,22 +4,6 @@ from necrobot.botbase.commandtype import CommandType
 from necrobot.config import Config
 
 
-class DelayRecord(CommandType):
-    def __init__(self, race_room):
-        CommandType.__init__(self, race_room, 'delayrecord')
-        self.help_text = 'If the race is complete, delays recording of the race for some extra time.'
-
-    async def _do_execute(self, command):
-        if self.bot_channel.last_begun_race is None or (not self.bot_channel.last_begun_race.complete):
-            return
-
-        if not self.bot_channel.last_begun_race.delay_record:
-            self.bot_channel.last_begun_race.delay_record = True
-            await self.bot_channel.write('Delaying recording for an extra {} seconds.'.format(Config.FINALIZE_TIME_SEC))
-        else:
-            await self.bot_channel.write('Recording is already delayed.')
-
-
 class Notify(CommandType):
     def __init__(self, race_room):
         CommandType.__init__(self, race_room, 'notify')

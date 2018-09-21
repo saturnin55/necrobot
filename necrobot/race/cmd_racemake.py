@@ -2,6 +2,7 @@ import necrobot.exception
 from necrobot.util import server
 from necrobot.race import raceinfo, raceutil
 from necrobot.race.privaterace import privateraceinfo, privateraceroom
+from necrobot.util.category import Category
 
 from necrobot.botbase.commandtype import CommandType
 
@@ -10,21 +11,23 @@ class Make(CommandType):
     def __init__(self, bot_channel):
         CommandType.__init__(self, bot_channel, 'make')
         self.help_text = \
-            'Makes a new race room; by default, this is Cadence All-zones seeded, Amplified. Change this by ' \
-            'providing flags:\n' \
-            '`charname`: Set the default match character.\n' \
-            '`u | s | seed X`: Set the races to be unseeded, seeded, or with a fixed seed.\n' \
-            '`nodlc`: Matches are marked as being without the Amplified DLC.\n' \
-            '`custom "desc"`: Give the matches a custom description.'
+            'Makes a new race room. ASO by default, or specify a category.\n' \
+            f'Example: `{self.mention} low`'
 
     async def _do_execute(self, cmd):
         try:
-            race_info = raceinfo.parse_args(cmd.args)
+            if not cmd.args:
+                race_info = raceinfo.RaceInfo()
+            elif args[0].lower() == 'custom':
+                try:
+                    race_info = raceinfo.RaceInfo(Category.CUSTOM, args[1])
+                except IndexError:
+                    await self.client.send_message(cmd.channel, f'Provide a description. Ex: `{self.mention} custom "Max Low"')
+                    return
+            else:
+                race_info = raceinfo.RaceInfo(category.fromstr(args[0]))
         except necrobot.exception.ParseException as e:
-            await self.client.send_message(
-                cmd.channel,
-                'Error parsing inputs: {0}'.format(e)
-            )
+            await self.client.send_message(cmd.channel, 'Invalid category. Choose one of `aso low hell any lowng custom`.')
             return
 
         await raceutil.make_room(race_info)

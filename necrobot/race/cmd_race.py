@@ -82,7 +82,7 @@ class Forfeit(CommandType):
 
     async def _do_execute(self, cmd):
         await self.bot_channel.current_race.forfeit_member(cmd.author)
-        
+
         if len(cmd.args) >= 1:
             if self.bot_channel.last_begun_race is None:
                 return
@@ -222,19 +222,3 @@ class Unpause(CommandType):
 
     async def _do_execute(self, cmd):
         await self.bot_channel.current_race.unpause()
-
-
-class ChangeRules(CommandType):
-    def __init__(self, race_room):
-        CommandType.__init__(self, race_room, 'changerules')
-        self.help_text = 'Change the rules for the race. Takes the same parameters as `.make`.'
-        self.admin_only = True
-
-    async def _do_execute(self, cmd):
-        try:
-            await self.bot_channel.change_race_info(cmd.args)
-        except necrobot.exception.ParseException as e:
-            await self.client.send_message(
-                cmd.channel,
-                "Couldn't parse input: `{0}`.".format(e)
-            )

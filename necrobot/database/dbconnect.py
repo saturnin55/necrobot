@@ -33,6 +33,7 @@ class DBConnect(object):
                 user=Config.MYSQL_DB_USER,
                 password=Config.MYSQL_DB_PASSWD,
                 host=Config.MYSQL_DB_HOST,
+                port=Config.MYSQL_DB_PORT,
                 database=Config.MYSQL_DB_NAME)
         elif not DBConnect._db_connection.is_connected():
             DBConnect._db_connection.reconnect()
