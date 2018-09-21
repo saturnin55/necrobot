@@ -150,9 +150,9 @@ async def get_all_racedata(user_id: int, cat_name: str) -> list:
         return cursor.fetchall()
 
 
-async def get_fastest_times_leaderboard(character_name: str, amplified: bool, limit: int) -> list:
+async def get_fastest_times_leaderboard(category_name: str, limit: int) -> list:
     async with DBConnect(commit=False) as cursor:
-        params = {'character': character_name, 'limit': limit,}
+        params = (category_name, limit,)
         cursor.execute(
             """
             SELECT
@@ -167,75 +167,54 @@ async def get_fastest_times_leaderboard(character_name: str, amplified: bool, li
                     INNER JOIN {races} ON {races}.`race_id` = {race_runs}.`race_id`
                     INNER JOIN race_types ON race_types.`type_id` = {races}.`type_id`
                     WHERE
-                        {race_runs}.`time` > 0
-                        AND {race_runs}.`level` = -2
-                        AND ({races}.`timestamp` > '2017-07-12' OR NOT race_types.`amplified`)
-                        AND race_types.`character` = %(character)s
-                        AND race_types.`descriptor` = 'All-zones'
-                        AND race_types.`seeded`
-                        AND {not_amplified}race_types.`amplified`
-                        AND NOT {races}.`private`
+                        {race_runs}.time > 0
+                        AND {race_runs}.level = -2
+                        AND race_types.category=%s
+                        AND NOT {races}.private
                     GROUP BY user_id
                 ) mintimes
-                INNER JOIN {race_runs} ON ({race_runs}.`user_id` = mintimes.`user_id` AND {race_runs}.`time` = mintimes.`min_time`)
-                INNER JOIN {races} ON {races}.`race_id` = {race_runs}.`race_id`
-                INNER JOIN race_types ON race_types.`type_id` = {races}.`type_id`
-                INNER JOIN users ON users.`user_id` = mintimes.`user_id`
+            INNER JOIN {race_runs} ON ({race_runs}.`user_id` = mintimes.`user_id` AND {race_runs}.`time` = mintimes.`min_time`)
+            INNER JOIN {races} ON {races}.`race_id` = {race_runs}.`race_id`
+            INNER JOIN race_types ON race_types.`type_id` = {races}.`type_id`
+            INNER JOIN users ON users.`user_id` = mintimes.`user_id`
             WHERE
                 {race_runs}.`level` = -2
-                AND ({races}.`timestamp` > '2017-07-12' OR NOT race_types.`amplified`)
-                AND race_types.`character` = %(character)s
-                AND race_types.`descriptor` = 'All-zones'
-                AND race_types.`seeded`
-                AND {not_amplified}race_types.`amplified`
+                AND race_types.category=%s
                 AND NOT {races}.`private`
             GROUP BY {race_runs}.`user_id`
             ORDER BY mintimes.min_time ASC
-            LIMIT %(limit)s
-            """.format(races=tn('races'), race_runs=tn('race_runs'), not_amplified=('' if amplified else 'NOT ')),
+            LIMIT %s
+            """.format(races=tn('races'), race_runs=tn('race_runs')),
             params)
         return cursor.fetchall()
 
 
-async def get_most_races_leaderboard(character_name: str, limit: int) -> list:
+async def get_most_races_leaderboard(category_name: str, limit: int) -> list:
     async with DBConnect(commit=False) as cursor:
-        params = (character_name, character_name, limit,)
+        params = (category_name, limit,)
         cursor.execute(
             """
             SELECT
                 user_name,
-                num_predlc + num_postdlc as total,
-                num_predlc,
-                num_postdlc
+                num_races
             FROM
             (
                 SELECT
                     users.discord_name as user_name,
                     SUM(
                             IF(
-                               race_types.character=%s
-                               AND race_types.descriptor='All-zones'
-                               AND NOT race_types.amplified
+                               race_types.category=%s
                                AND NOT {0}.private,
                                1, 0
                             )
-                    ) as num_predlc,
-                    SUM(
-                            IF(
-                               race_types.character=%s
-                               AND race_types.descriptor='All-zones'
-                               AND race_types.amplified
-                               AND NOT {0}.private,
-                               1, 0
-                            )
-                    ) as num_postdlc
+                    ) as num_races
                 FROM {1}
                     INNER JOIN users ON users.user_id = {1}.user_id
                     INNER JOIN {0} ON {0}.race_id = {1}.race_id
                     INNER JOIN race_types ON race_types.type_id = {0}.type_id
                 GROUP BY users.discord_name
             ) tbl1
-            ORDER BY total DESC
+            ORDER BY num_races DESC
             LIMIT %s
             """.format(tn('races'), tn('race_runs')),
             params)

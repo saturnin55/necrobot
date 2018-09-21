@@ -9,22 +9,13 @@ from necrobot.util.necrodancer.character import NDChar
 class Fastest(CommandType):
     def __init__(self, bot_channel):
         CommandType.__init__(self, bot_channel, 'fastest')
-        self.help_text = '`.fastest <character_name>` shows the fastest times for a given character. By ' \
-                         'default this shows Amplified times. Use `.fastest <character_name> nodlc to get ' \
-                         'base-game times.'
+        self.help_text = '`.fastest <category>` shows the fastest times for a given category.'
 
     async def _do_execute(self, cmd):
         await server.client.send_typing(cmd.channel)
-        amplified = True
 
         # Parse arguments
         args = cmd.args
-        try:
-            base_arg_pos = args.index('nodlc')
-            amplified = False
-            args.pop(base_arg_pos)
-        except ValueError:
-            pass
 
         if len(cmd.args) != 1:
             await self.client.send_message(
@@ -32,18 +23,17 @@ class Fastest(CommandType):
                 '{0}: Wrong number of arguments for `.fastest`.'.format(cmd.author.mention))
             return
 
-        ndchar = NDChar.fromstr(args[0])
-        if ndchar is None:
+        category = Category.fromstr(args[0])
+        if category is None:
             await self.client.send_message(
                 cmd.channel,
-                '{0}: Couldn\'t parse {1} as a character.'.format(cmd.author.mention, args[0]))
+                '{0}: Couldn\'t parse {1} as a category.'.format(cmd.author.mention, args[0]))
             return
 
-        infotext = await racestats.get_fastest_times_infotext(ndchar, amplified, 20)
-        infobox = 'Fastest public all-zones {2} {0} times:\n```\n{1}```'.format(
-            ndchar.name,
-            strutil.tickless(infotext),
-            'Amplified' if amplified else 'base-game')
+        infotext = await statfn.get_fastest_times_infotext(category, 20)
+        infobox = 'Fastest public {0} times:\n```\n{1}```'.format(
+            category.name,
+            strutil.tickless(infotext))
         await self.client.send_message(
             cmd.channel,
             infobox)
@@ -52,8 +42,8 @@ class Fastest(CommandType):
 class MostRaces(CommandType):
     def __init__(self, bot_channel):
         CommandType.__init__(self, bot_channel, 'mostraces')
-        self.help_text = '`.mostraces <character_name>` shows the racers with the largest number of (public, ' \
-                         'all-zones) races for that character.'
+        self.help_text = '`.mostraces <category_name>` shows the racers with the largest number of public ' \
+                         ' races for that category.'
 
     async def _do_execute(self, cmd):
         await server.client.send_typing(cmd.channel)
@@ -63,16 +53,16 @@ class MostRaces(CommandType):
                 '{0}: Wrong number of arguments for `.mostraces`.'.format(cmd.author.mention))
             return
 
-        ndchar = NDChar.fromstr(cmd.args[0])
-        if ndchar is None:
+        category = Category.fromstr(cmd.args[0])
+        if category is None:
             await self.client.send_message(
                 cmd.channel,
-                '{0}: Couldn\'t parse {1} as a character.'.format(cmd.author.mention, cmd.args[0]))
+                '{0}: Couldn\'t parse {1} as a category.'.format(cmd.author.mention, cmd.args[0]))
             return
 
-        infotext = await racestats.get_most_races_infotext(ndchar, 20)
-        infobox = 'Most public all-zones {0} races:\n```\n{1}```'.format(
-            ndchar.name,
+        infotext = await statfn.get_most_races_infotext(category, 20)
+        infobox = 'Most public {0} races:\n```\n{1}```'.format(
+            category.name,
             strutil.tickless(infotext)
         )
         await self.client.send_message(
@@ -84,23 +74,13 @@ class MostRaces(CommandType):
 class Stats(CommandType):
     def __init__(self, bot_channel):
         CommandType.__init__(self, bot_channel, 'stats')
-        self.help_text = 'Show your own race stats, or use `.stats <username>` to show for a different user. ' \
-                         'By default this shows stats for Amplified races; to get stats for the base game, ' \
-                         'call `.stats <username> nodlc`.'
+        self.help_text = 'Show your own race stats, or use `.stats <username>` to show for a different user.'
 
     async def _do_execute(self, cmd):
         await server.client.send_typing(cmd.channel)
 
-        amplified = True
-
         # Parse arguments
         args = cmd.args
-        try:
-            base_arg_pos = args.index('nodlc')
-            amplified = False
-            args.pop(base_arg_pos)
-        except ValueError:
-            pass
 
         if len(args) > 1:
             await self.client.send_message(
@@ -120,11 +100,10 @@ class Stats(CommandType):
                 return
 
         # Show stats
-        general_stats = await racestats.get_general_stats(user.user_id, amplified=amplified)
+        general_stats = await statfn.get_general_stats(user.user_id)
         await self.client.send_message(
             cmd.channel,
-            '```\n{0}\'s stats ({1}, public all-zones races):\n{2}\n```'.format(
+            '```\n{0}\'s stats (public races):\n{1}\n```'.format(
                 strutil.tickless(user.display_name),
-                'Amplified' if amplified else 'Base game',
                 general_stats.infotext)
         )
