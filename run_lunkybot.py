@@ -1,11 +1,13 @@
 from necrobot.botbase import server
-from necrobot.spelunky.lunkymainchannel import MainBotChannel
+from necrobot.spelunky.mainchannel import MainBotChannel
+from necrobot.spelunky.pmbotchannel import PMBotChannel
 from necrobot.util import console
 from necrobot import logon
 
 
 async def load_lunkybot_config(necrobot):
     MAIN_CHANNEL_NAME = 'lunkybot'
+    necrobot.register_pm_channel(PMBotChannel())
 
     server.main_channel = server.find_channel(channel_name=MAIN_CHANNEL_NAME)
     if server.main_channel is None:
