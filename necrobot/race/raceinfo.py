@@ -20,16 +20,16 @@ class RaceInfo(object):
 
         return the_copy
 
-    def __init__(self, category=Category.ASO, cat_str=None, seeded=False,
-                 can_be_solo=False, post_results=True, condor_race=False, private_race=False):
-        self.seed = 0
+    def __init__(self, category=Category.ASO, cat_str=None, seeded=False):
         self.category = category
         self.cat_str = str(self.category) if cat_str is None else cat_str
         self.seeded = seeded
-        self.can_be_solo = can_be_solo
-        self.post_results = post_results
-        self.condor_race = condor_race
-        self.private_race = private_race
+
+        self.seed = 0
+        self.can_be_solo = False
+        self.post_results = True
+        self.condor_race = False
+        self.private_race = False
 
     # a string "Seed: (int)" if the race is seeded, or the empty string otherwise
     @property
