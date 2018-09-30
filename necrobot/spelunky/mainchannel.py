@@ -13,6 +13,9 @@ class MainBotChannel(BotChannel):
             cmd_admin.Die(self),
             cmd_admin.Reboot(self),
 
+            cmd_racemake.Make(self),
+            cmd_racemake.MakePrivate(self),
+
             cmd_role.AddRacerRole(self),
             cmd_role.RemoveRacerRole(self),
 
