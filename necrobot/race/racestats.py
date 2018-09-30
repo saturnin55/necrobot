@@ -2,7 +2,6 @@ import math
 
 from necrobot.race import racedb
 from necrobot.util import console, racetime
-from necrobot.stats.leaguestats import LeagueStats
 from necrobot.util.category import Category
 from necrobot.util.singleton import Singleton
 
@@ -165,15 +164,15 @@ async def get_winrates(user_id_1: int, user_id_2: int, category: Category) -> tu
 
 async def get_most_races_infotext(category: Category, limit: int) -> str:
     most_races = await racedb.get_most_races_leaderboard(category.name.lower(), limit)
-    infotext = '{0:>16} {1:>6}\n'.format('', 'Races')
+    infotext = '{0:>20} {1:>6}\n'.format('', 'Races')
     for row in most_races:
-        infotext += '{0:>16} {1:>6}\n'.format(row[0], row[1])
+        infotext += '{0:>20.20} {1:>6}\n'.format(row[0], row[1])
     return infotext
 
 
 async def get_fastest_times_infotext(category: Category, limit: int) -> str:
     fastest_times = await racedb.get_fastest_times_leaderboard(category.name.lower(), limit)
-    infotext = '{0:>16} {1:<9} {2:<9} {3:<13}\n'.format('', 'Time (rta)', 'Seed', 'Date')
+    infotext = '{0:>20} {1:<9} {2:<9} {3:<13}\n'.format('', 'Time (rta)', 'Seed', 'Date')
     for row in fastest_times:
         infotext += '{0:>20.20} {1:>9} {2:>9} {3:>13}\n'.format(
             row[0],

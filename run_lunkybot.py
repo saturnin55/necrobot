@@ -1,7 +1,6 @@
-from necrobot.botbase import server
 from necrobot.spelunky.mainchannel import MainBotChannel
 from necrobot.spelunky.pmbotchannel import PMBotChannel
-from necrobot.util import console
+from necrobot.util import server, console
 from necrobot import logon
 
 
@@ -18,5 +17,6 @@ async def load_lunkybot_config(necrobot):
 if __name__ == "__main__":
     logon.logon(
         config_filename='data/lunkybot_config',
+        logging_prefix='lunkybot',
         load_config_fn=load_lunkybot_config
     )

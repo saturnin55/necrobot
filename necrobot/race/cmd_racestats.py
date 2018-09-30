@@ -1,9 +1,8 @@
 from necrobot.botbase.commandtype import CommandType
 from necrobot.race import racestats
 from necrobot.user import userlib
-from necrobot.util import server
-from necrobot.util import strutil
-from necrobot.util.necrodancer.character import NDChar
+from necrobot.util import server, strutil
+from necrobot.util.category import Category
 
 
 class Fastest(CommandType):
@@ -30,7 +29,7 @@ class Fastest(CommandType):
                 '{0}: Couldn\'t parse {1} as a category.'.format(cmd.author.mention, args[0]))
             return
 
-        infotext = await statfn.get_fastest_times_infotext(category, 20)
+        infotext = await racestats.get_fastest_times_infotext(category, 20)
         infobox = 'Fastest public {0} times:\n```\n{1}```'.format(
             category.name,
             strutil.tickless(infotext))
@@ -60,7 +59,7 @@ class MostRaces(CommandType):
                 '{0}: Couldn\'t parse {1} as a category.'.format(cmd.author.mention, cmd.args[0]))
             return
 
-        infotext = await statfn.get_most_races_infotext(category, 20)
+        infotext = await racestats.get_most_races_infotext(category, 20)
         infobox = 'Most public {0} races:\n```\n{1}```'.format(
             category.name,
             strutil.tickless(infotext)
@@ -100,7 +99,7 @@ class Stats(CommandType):
                 return
 
         # Show stats
-        general_stats = await statfn.get_general_stats(user.user_id)
+        general_stats = await racestats.get_general_stats(user.user_id)
         await self.client.send_message(
             cmd.channel,
             '```\n{0}\'s stats (public races):\n{1}\n```'.format(

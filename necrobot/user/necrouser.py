@@ -11,9 +11,9 @@ from necrobot.user.userprefs import UserPrefs
 
 class NecroUser(object):
     def __init__(self, commit_fn):
-        """Initialization. There should be no reason to directly create NecroUser objects; use userlib 
+        """Initialization. There should be no reason to directly create NecroUser objects; use userlib
         instead.
-        
+
         Parameters
         ----------
         commit_fn: function(NecroUser) -> None
@@ -153,18 +153,10 @@ class NecroUser(object):
 
     @property
     def infotext(self) -> str:
-        if self.twitch_name == self.rtmp_name:
-            return '  Twitch/RTMP: {0}\n' \
-                   '     Timezone: {1}'.format(
-                    self.rtmp_name,
-                    self.timezone)
-        else:
-            return '    Twitch: {0}\n' \
-                   '      RTMP: {1}\n' \
-                   '  Timezone: {2}'.format(
-                    self.twitch_name,
-                    self.rtmp_name,
-                    self.timezone)
+        return '    Twitch: {0}\n' \
+               '  Timezone: {2}'.format(
+                self.twitch_name,
+                self.timezone)
 
     @property
     def infobox(self) -> str:
@@ -189,7 +181,7 @@ class NecroUser(object):
         commit: bool = True
     ) -> None:
         """Set all non-None values and optionally commit the change to the database.
-        
+
         Parameters
         ----------
         discord_member: discord.Member
@@ -206,7 +198,7 @@ class NecroUser(object):
             The user's timezone as a string, e.g., 'Asia/Tokyo'.
         user_info: str
             The user's custom info (shown on .userinfo).
-        user_prefs: UserPrefs  
+        user_prefs: UserPrefs
             The user's preferences.
         commit: bool
             If False, will not commit changes to the database.

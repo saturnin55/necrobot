@@ -18,14 +18,14 @@ class Make(CommandType):
         try:
             if not cmd.args:
                 race_info = raceinfo.RaceInfo()
-            elif args[0].lower() == 'custom':
+            elif cmd.args[0].lower() == 'custom':
                 try:
-                    race_info = raceinfo.RaceInfo(Category.CUSTOM, args[1])
+                    race_info = raceinfo.RaceInfo(Category.CUSTOM, cmd.args[1])
                 except IndexError:
-                    await self.client.send_message(cmd.channel, f'Provide a description. Ex: `{self.mention} custom "Max Low"')
+                    await self.client.send_message(cmd.channel, f'Provide a description. Ex: `{self.mention} custom "Max Low"`')
                     return
             else:
-                race_info = raceinfo.RaceInfo(category.fromstr(args[0]))
+                race_info = raceinfo.RaceInfo(Category.fromstr(cmd.args[0]))
         except necrobot.exception.ParseException as e:
             await self.client.send_message(cmd.channel, 'Invalid category. Choose one of `aso low hell any lowng custom`.')
             return

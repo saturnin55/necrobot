@@ -152,7 +152,7 @@ async def get_all_racedata(user_id: int, cat_name: str) -> list:
 
 async def get_fastest_times_leaderboard(category_name: str, limit: int) -> list:
     async with DBConnect(commit=False) as cursor:
-        params = (category_name, limit,)
+        params = {'category': category_name, 'limit': limit,}
         cursor.execute(
             """
             SELECT
@@ -169,7 +169,7 @@ async def get_fastest_times_leaderboard(category_name: str, limit: int) -> list:
                     WHERE
                         {race_runs}.time > 0
                         AND {race_runs}.level = -2
-                        AND race_types.category=%s
+                        AND race_types.category=%(category)s
                         AND NOT {races}.private
                     GROUP BY user_id
                 ) mintimes
@@ -179,11 +179,11 @@ async def get_fastest_times_leaderboard(category_name: str, limit: int) -> list:
             INNER JOIN users ON users.`user_id` = mintimes.`user_id`
             WHERE
                 {race_runs}.`level` = -2
-                AND race_types.category=%s
+                AND race_types.category=%(category)s
                 AND NOT {races}.`private`
             GROUP BY {race_runs}.`user_id`
             ORDER BY mintimes.min_time ASC
-            LIMIT %s
+            LIMIT %(limit)s
             """.format(races=tn('races'), race_runs=tn('race_runs')),
             params)
         return cursor.fetchall()

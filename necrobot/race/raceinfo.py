@@ -21,7 +21,7 @@ class RaceInfo(object):
         return the_copy
 
     def __init__(self, category=Category.ASO, cat_str=None, seeded=False,
-                 can_be_solo=True, post_results=True, condor_race=False, private_race=False):
+                 can_be_solo=False, post_results=True, condor_race=False, private_race=False):
         self.seed = 0
         self.category = category
         self.cat_str = str(self.category) if cat_str is None else cat_str
