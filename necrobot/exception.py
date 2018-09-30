@@ -57,7 +57,8 @@ class InvalidSchemaName(DatabaseException):
 
 # ParseException ------------------------------------------------------
 class ParseException(NecroException):
-    pass
+    def __str__(self):
+        return self.args[0]
 
 
 class DoubledArgException(ParseException):

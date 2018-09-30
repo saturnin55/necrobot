@@ -16,27 +16,12 @@ class Make(CommandType):
             f'Example: `{self.mention} low`'
 
     async def _do_execute(self, cmd):
-        seeded = '-s' in cmd.args or '--seeded' in cmd.args
-        for arg in cmd.args.copy():
-            if arg.startswith('-'):
-                cmd.args.remove(arg)
-
         try:
-            if not cmd.args:
-                race_info = raceinfo.RaceInfo()
-            elif cmd.args[0].lower() == 'custom':
-                try:
-                    race_info = raceinfo.RaceInfo(Category.CUSTOM, cmd.args[1])
-                except IndexError:
-                    await self.client.send_message(cmd.channel, f'Provide a description. Ex: `{self.mention} custom "Max Low"`')
-                    return
-            else:
-                race_info = raceinfo.RaceInfo(Category.fromstr(cmd.args[0]))
+            race_info = raceinfo.parse_args(cmd.args)
         except necrobot.exception.ParseException as e:
-            await self.client.send_message(cmd.channel, 'Invalid category. Choose one of `aso low hell any lowng custom`.')
+            await self.client.send_message(cmd.channel, e)
             return
 
-        race_info.seeded = seeded
         await raceutil.make_room(race_info)
 
 
@@ -55,43 +40,23 @@ class MakePrivate(CommandType):
             del cmd.args[cmd_idx]
         except (ValueError, IndexError):
             repeat_index = 1
+
         repeat_index = min(20, max(repeat_index, 1))
-
-        seeded = '-s' in cmd.args or '--seeded' in cmd.args
-        for arg in cmd.args.copy():
-            if arg.startswith('-'):
-                cmd.args.remove(arg)
-
-        author_as_member = server.get_as_member(cmd.author)     # TODO convert to NecroUser
+        author_as_member = server.get_as_member(cmd.author)  # TODO convert to NecroUser
 
         try:
-            if not cmd.args:
-                race_info = raceinfo.RaceInfo()
-            elif cmd.args[0].lower() == 'custom':
-                try:
-                    race_info = raceinfo.RaceInfo(Category.CUSTOM, cmd.args[1])
-                except IndexError:
-                    await self.client.send_message(cmd.channel, f'Provide a description. Ex: `{self.mention} custom "Max Low"`')
-                    return
-            else:
-                race_info = raceinfo.RaceInfo(Category.fromstr(cmd.args[0]))
+            race_info = raceinfo.parse_args(cmd.args)
         except necrobot.exception.ParseException as e:
-            await self.client.send_message(cmd.channel, 'Invalid category. Choose one of `aso low hell any lowng custom`.')
+            await self.client.send_message(cmd.channel, e)
             return
 
-        race_info.seeded = seeded
         race_info.private_race = True
         race_info.post_results = False
         race_info.can_be_solo = True
-
         private_race_info = PrivateRaceInfo(race_info)
 
-        if private_race_info is not None:
-            for _ in range(repeat_index):
-                await privateraceroom.make_private_room(private_race_info, author_as_member)
-        else:
-            await self.client.send_message(
-                cmd.channel, 'Error parsing arguments to `.makeprivate`.')
+        for _ in range(repeat_index):
+            await privateraceroom.make_private_room(private_race_info, author_as_member)
 
 
 class MakeCondor(CommandType):
@@ -113,13 +78,14 @@ class MakeCondor(CommandType):
 
         repeat_index = min(20, max(repeat_index, 1))
 
-        private_race_info = privateraceinfo.parse_args(command.args)
-        private_race_info.race_info.can_be_solo = False
-        private_race_info.race_info.post_results = True
+        try:
+            race_info = raceinfo.parse_args(cmd.args)
+        except necrobot.exception.ParseException as e:
+            await self.client.send_message(cmd.channel, e)
+            return
+
         private_race_info.race_info.condor_race = True
-        if private_race_info is not None:
-            for _ in range(repeat_index):
-                await privateraceroom.make_private_room(private_race_info, command.author)
-        else:
-            await self.client.send_message(
-                command.channel, 'Error parsing arguments to `.makecondor`.')
+        private_race_info = PrivateRaceInfo(race_info)
+
+        for _ in range(repeat_index):
+            await privateraceroom.make_private_room(private_race_info, command.author)

@@ -21,8 +21,8 @@ class Category(Enum):
         }[self.name]
 
     @staticmethod
-    def fromstr(char_name):
+    def fromstr(cat_name):
         for cat in Category:
-            if cat.name.lower() == char_name.lower():
+            if cat.name.lower() == cat_name.lower():
                 return cat
-        raise necrobot.exception.ParseException(f'Error parsing {char_name} as a category.')
+        raise necrobot.exception.ParseException(f'Invalid category. Choose one of `{" ".join(cat.name.lower() for cat in Category)}`.')
