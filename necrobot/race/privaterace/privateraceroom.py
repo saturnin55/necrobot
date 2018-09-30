@@ -87,9 +87,6 @@ class PrivateRaceRoom(RaceRoom):
         # Initialize base -----------------------------------------
         await RaceRoom.initialize(self)
 
-        # Automatically enter creator into race
-        await self.current_race.enter_member(self._room_creator)
-
     # Allow the member to see the necrobot
     async def allow(self, member_or_role):
         read_permit = discord.PermissionOverwrite()

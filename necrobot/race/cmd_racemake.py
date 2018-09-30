@@ -67,12 +67,12 @@ class MakeCondor(CommandType):
                          "to create (limit 20)."
         self.admin_only = True
 
-    async def _do_execute(self, command):
+    async def _do_execute(self, cmd):
         try:
-            cmd_idx = command.args.index('-repeat')
-            repeat_index = int(command.args[cmd_idx + 1])
-            del command.args[cmd_idx + 1]
-            del command.args[cmd_idx]
+            cmd_idx = cmd.args.index('-repeat')
+            repeat_index = int(cmd.args[cmd_idx + 1])
+            del cmd.args[cmd_idx + 1]
+            del cmd.args[cmd_idx]
         except (ValueError, IndexError):
             repeat_index = 1
 
@@ -88,4 +88,4 @@ class MakeCondor(CommandType):
         private_race_info = PrivateRaceInfo(race_info)
 
         for _ in range(repeat_index):
-            await privateraceroom.make_private_room(private_race_info, command.author)
+            await privateraceroom.make_private_room(private_race_info, cmd.author)
