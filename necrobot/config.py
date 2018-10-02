@@ -119,8 +119,9 @@ RECORDING_ACTIVATED: bool
 
 import datetime
 import unittest
-
+import json
 from enum import IntEnum
+
 from necrobot.util import console
 
 
@@ -144,6 +145,7 @@ class Config(object):
     # Admin -----------------------------------------------------------------------------------
     ADMIN_ROLE_NAMES = ['Admin']  # list of names of roles to give admin access
     STAFF_ROLE = 'Staff'
+    RACER_ROLE = 'Racer'
 
     # Channels --------------------------------------------------------------------------------
     MAIN_CHANNEL_NAME = 'necrobot_main'
@@ -158,9 +160,6 @@ class Config(object):
     MYSQL_DB_PASSWD = ''
     MYSQL_DB_NAME = 'necrobot'
     MYSQL_DB_PORT = '3306'
-
-    # Daily -----------------------------------------------------------------------------------
-    DAILY_GRACE_PERIOD = datetime.timedelta(minutes=60)
 
     # GSheet ----------------------------------------------------------------------------------
     OAUTH_CREDENTIALS_JSON = 'data/necrobot-service-acct.json'
@@ -177,7 +176,7 @@ class Config(object):
     SERVER_ID = ''
 
     # Matches ---------------------------------------------------------------------------------
-    MATCH_AUTOCONTEST_IF_WITHIN_HUNDREDTHS = 500
+    MATCH_AUTOCONTEST_MARGIN = 5000
     MATCH_FIRST_WARNING = datetime.timedelta(minutes=15)
     MATCH_FINAL_WARNING = datetime.timedelta(minutes=5)
     MATCH_CHANNEL_CATEGORY_NAME = "Race rooms"
@@ -192,38 +191,24 @@ class Config(object):
     # RaceRooms -------------------------------------------------------------------------------
     CLEANUP_TIME = datetime.timedelta(minutes=2)
     NO_ENTRANTS_CLEANUP = datetime.timedelta(minutes=2)
-    NO_ENTRANTS_CLEANUP_WARNING = datetime.timedelta(minutes=1, seconds=30)
+    NO_ENTRANTS_CLEANUP_WARNING = datetime.timedelta(minutes=1)
     RACE_POKE_DELAY = int(10)
 
-    # Vod recording ---------------------------------------------------------------------------
-    VODRECORD_USERNAME = ''
-    VODRECORD_PASSWD = ''
-    RECORDING_ACTIVATED = False
 
     # Methods ---------------------------------------------------------------------------------
     @staticmethod
     def write():
-        vals = [
-            ['login_token', Config.LOGIN_TOKEN],
-            ['server_id', Config.SERVER_ID],
-            ['test_level', Config.DEBUG_LEVEL],
-
-            ['mysql_db_host', Config.MYSQL_DB_HOST],
-            ['mysql_db_user', Config.MYSQL_DB_USER],
-            ['mysql_db_passwd', Config.MYSQL_DB_PASSWD],
-            ['mysql_db_name', Config.MYSQL_DB_NAME],
-            ['mysql_db_port', Config.MYSQL_DB_PORT],
-
-            ['vodrecord_username', Config.VODRECORD_USERNAME],
-            ['vodrecord_passwd', Config.VODRECORD_PASSWD],
-            ['activate_vodrecord', Config.RECORDING_ACTIVATED],
-
-            ['league_name', Config.LEAGUE_NAME],
-        ]
+        config = {}
+        for key, value in Config.__dict__.items():
+            if key.startswith('_') or key in ('BOT_VERSION', 'CONFIG_FILE', 'write', 'full_debugging', 'debugging', 'testing'):
+                continue
+            elif key in ('MATCH_FIRST_WARNING', 'MATCH_FINAL_WARNING', 'CLEANUP_TIME', 'NO_ENTRANTS_CLEANUP', 'NO_ENTRANTS_CLEANUP_WARNING'):
+                config[key.lower() + '_minutes'] = value.seconds // 60
+            else:
+                config[key.lower()] = value
 
         with open(Config.CONFIG_FILE, 'w') as file:
-            for row in vals:
-                file.write('{0}={1}\n'.format(row[0], row[1]))
+            json.dump(config, file, separators=(',\n', ': '))
 
     @classmethod
     def full_debugging(cls) -> bool:
@@ -239,56 +224,14 @@ class Config(object):
 
 
 def init(config_filename):
-    defaults = {
-        'login_token': '',
-        'server_id': '',
-        'mysql_db_host': 'localhost',
-        'mysql_db_user': 'root',
-        'mysql_db_passwd': '',
-        'mysql_db_name': 'necrobot',
-        'mysql_db_port': '3306',
-        'vodrecord_username': '',
-        'vodrecord_passwd': '',
-        'activate_vodrecord': 'false',
-        'league_name': '',
-        'test_level': '',
-        }
+    with open(config_filename) as file:
+        config = json.load(file)
 
-    with open(config_filename, 'r') as file:
-        for line in file:
-            args = line.split('=')
-            if len(args) == 2:
-                if args[0] in defaults:
-                    defaults[args[0]] = args[1].rstrip('\n')
-                else:
-                    console.warning("Error in {0}: variable {1} isn't recognized.".format(config_filename, args[0]))
-            else:
-                console.warning("Error in {0} reading line: \"{1}\".".format(config_filename, line))
-
-    Config.LOGIN_TOKEN = defaults['login_token']
-    Config.SERVER_ID = defaults['server_id']
-
-    Config.MYSQL_DB_HOST = defaults['mysql_db_host']
-    Config.MYSQL_DB_USER = defaults['mysql_db_user']
-    Config.MYSQL_DB_PASSWD = defaults['mysql_db_passwd']
-    Config.MYSQL_DB_NAME = defaults['mysql_db_name']
-    Config.MYSQL_DB_PORT = defaults['mysql_db_port']
-
-    Config.VODRECORD_USERNAME = defaults['vodrecord_username']
-    Config.VODRECORD_PASSWD = defaults['vodrecord_passwd']
-    Config.RECORDING_ACTIVATED = defaults['activate_vodrecord'].lower() == 'true'
-
-    Config.LEAGUE_NAME = defaults['league_name']
-
-    if defaults['test_level'] == '0':
-        Config.DEBUG_LEVEL = DebugLevel.FULL_DEBUG
-    elif defaults['test_level'] == '1':
-        Config.DEBUG_LEVEL = DebugLevel.BOT_DEBUG
-    elif defaults['test_level'] == '2':
-        Config.DEBUG_LEVEL = DebugLevel.TEST
-    elif defaults['test_level'] == '3':
-        Config.DEBUG_LEVEL = DebugLevel.RUN
-        Config.STAFF_ROLE = 'CoNDOR Staff'
+    for key, value in config.items():
+        if key[-8:] == '_minutes':
+            setattr(Config, key[:-8].upper(), datetime.timedelta(minutes=value))
+        else:
+            setattr(Config, key.upper(), value)
 
     Config.CONFIG_FILE = config_filename
 

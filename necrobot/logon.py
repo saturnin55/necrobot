@@ -1,7 +1,7 @@
 """
-Primary function for logging on to Discord. 
+Primary function for logging on to Discord.
 
-logon() blocks until the bot is logged out; any code to be run after bot log-on 
+logon() blocks until the bot is logged out; any code to be run after bot log-on
 should be placed in a coroutine and passed to logon in the on_ready_fn parameter.
 """
 
@@ -19,7 +19,6 @@ import websockets
 
 from necrobot import config
 from necrobot.botbase.necrobot import Necrobot
-from necrobot.stream.vodrecord import VodRecorder
 from necrobot.util import backoff, console
 from necrobot.util.necrodancer import seedgen
 
@@ -31,7 +30,7 @@ def logon(
         on_ready_fn: types.FunctionType = None
 ) -> None:
     """Log on to Discord. Block until logout.
-    
+
     Parameters
     ----------
     config_filename: str
@@ -173,5 +172,4 @@ def logon(
 
     finally:
         asyncio.get_event_loop().close()
-        VodRecorder().end_all_async_unsafe()
         config.Config.write()

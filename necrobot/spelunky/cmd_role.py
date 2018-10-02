@@ -1,13 +1,12 @@
 from necrobot.util import server
+from necrobot.config import Config
 from necrobot.botbase.commandtype import CommandType
-
-ROLE_NAME = 'Racer'
 
 
 class AddRacerRole(CommandType):
     def __init__(self, bot_channel):
         CommandType.__init__(self, bot_channel, 'addrole')
-        self.help_text = f'Add yourself to the {ROLE_NAME} role.'
+        self.help_text = f'Add yourself to the {Config.RACER_ROLE} role.'
 
     async def _do_execute(self, cmd):
         await _modify_roles(self, cmd, add=True)
@@ -16,7 +15,7 @@ class AddRacerRole(CommandType):
 class RemoveRacerRole(CommandType):
     def __init__(self, bot_channel):
         CommandType.__init__(self, bot_channel, 'removerole')
-        self.help_text = f'Remove yourself from the {ROLE_NAME} role.'
+        self.help_text = f'Remove yourself from the {Config.RACER_ROLE} role.'
 
     async def _do_execute(self, cmd):
         await _modify_roles(self, cmd, add=False)
@@ -25,7 +24,7 @@ class RemoveRacerRole(CommandType):
 async def _modify_roles(cmdtype: CommandType, cmd, add: bool):
     role_to_use = None
     for role in server.server.roles:
-        if role.name == ROLE_NAME:
+        if role.name == Config.RACER_ROLE:
             role_to_use = role
             break
     else:

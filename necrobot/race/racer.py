@@ -14,8 +14,8 @@ class Racer(object):
         self._user = None
         self._discord_id = int(member.id)
         self._state = RacerStatus.unready       # see RacerState notes above
-        self.time = FIELD_UNKNOWN               # hundredths of a second
-        self.igt = FIELD_UNKNOWN                # hundredths of a second
+        self.time = FIELD_UNKNOWN               # milliseconds
+        self.igt = FIELD_UNKNOWN                # milliseconds
         self.level = level.LEVEL_NOS            # level of death (or LEVEL_FINISHED or LEVEL_UNKNOWN_DEATH)
         self.comment = ''                       # a comment added with .comment
 
@@ -45,7 +45,7 @@ class Racer(object):
     @property
     def short_status_str(self) -> str:
         return self._status_str(True)
-    
+
     def _status_str(self, short: bool) -> str:
         status = ''
         if self._state == RacerStatus.finished:
@@ -138,7 +138,7 @@ class Racer(object):
             self.level = level.LEVEL_FINISHED
             return True
         return False
-            
+
     def unfinish(self) -> bool:
         if self._state == RacerStatus.finished:
             self._state = RacerStatus.racing

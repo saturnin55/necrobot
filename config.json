@@ -1,0 +1,46 @@
+{
+    "bot_command_prefix": ".",
+    "debug_level": 3,
+
+    "admin_role_names": ["Admin"],
+    "staff_role": "Staff",
+    "racer_role": "Racer",
+
+    "main_channel_name": "necrobot_main",
+    "daily_leaderboards_channel_name": "daily_leaderboards",
+    "ladder_admin_channel_name": "ladder_admin",
+    "race_results_channel_name": "race_results",
+    "notifications_channel_name": "bot_notifications",
+
+    "mysql_db_host": "localhost",
+    "mysql_db_user": "root",
+    "mysql_db_passwd": "",
+    "mysql_db_name": "necrobot",
+    "mysql_db_port": 3306,
+
+    "oauth_credentials_json": "data/necrobot-service-acct.json",
+
+    "ratings_in_nicknames": true,
+
+    "league_name": "",
+    "log_directory": "logs",
+
+    "login_token": "",
+    "server_id": "",
+
+    "match_autocontest_margin": 5000,
+    "match_first_warning_minutes": 15,
+    "match_final_warning_minutes": 5,
+    "match_channel_category_name": "Race rooms",
+
+    "countdown_length": 10,
+    "unpause_countdown_length": 3,
+    "incremental_countdown_start": 5,
+    "finalize_time_sec": 60,
+    "race_channel_category_name": "Race rooms",
+
+    "cleanup_time_minutes": 2,
+    "no_entrants_cleanup_minutes": 2,
+    "no_entrants_cleanup_warning_minutes": 1,
+    "race_poke_delay": 10
+}

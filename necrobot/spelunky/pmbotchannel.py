@@ -14,9 +14,6 @@ class PMBotChannel(BotChannel):
             cmd_admin.Reboot(self),
             cmd_admin.RedoInit(self),
 
-            cmd_role.AddRacerRole(self),
-            cmd_role.RemoveRacerRole(self),
-
             cmd_racestats.Fastest(self),
             cmd_racestats.MostRaces(self),
             cmd_racestats.Stats(self),
