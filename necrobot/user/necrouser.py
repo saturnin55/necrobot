@@ -153,10 +153,7 @@ class NecroUser(object):
 
     @property
     def infotext(self) -> str:
-        return '    Twitch: {0}\n' \
-               '  Timezone: {2}'.format(
-                self.twitch_name,
-                self.timezone)
+        return f'    Twitch: {self.twitch_name}\n  Timezone: {self.timezone}'
 
     @property
     def infobox(self) -> str:
