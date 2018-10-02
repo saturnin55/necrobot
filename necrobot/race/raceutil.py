@@ -50,14 +50,13 @@ async def make_room(race_info):
 
 # Return a new (unique) race room name from the race info
 def get_raceroom_name(race_info):
-    name_prefix = race_info.category.name.lower()
-    cut_length = len(name_prefix) + 1
+    name_prefix = race_info.category.name.lower() + '-'
     largest_postfix = 0
     for channel in server.server.channels:
         if channel.name.startswith(name_prefix):
             try:
-                val = int(channel.name[cut_length:])
+                val = int(channel.name[len(name_prefix):])
                 largest_postfix = max(largest_postfix, val)
             except ValueError:
                 pass
-    return '{0}-{1}'.format(name_prefix, largest_postfix + 1)
+    return '{0}{1}'.format(name_prefix, largest_postfix + 1)
